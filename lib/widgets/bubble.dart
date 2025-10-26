@@ -24,6 +24,7 @@ class _FloatingBubbleState extends State<FloatingBubble>
   late Animation<double> _yAnimation;
   final Random _random = Random();
   bool _isSelected = false;
+  bool canShowTrackingTip = true;
 
   @override
   void initState() {
@@ -74,10 +75,25 @@ class _FloatingBubbleState extends State<FloatingBubble>
                   : 80,
               child: GestureDetector(
                 onTap: () {
+                  if(!_isSelected && canShowTrackingTip)
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Hold the bubble to see path'),
+                            duration: Duration(seconds: 3)
+                        ),
+                      );
+                      canShowTrackingTip = false;
+                      Future.delayed(const Duration(seconds: 5), (){
+                        canShowTrackingTip = true;
+                      });
+                    }
                   setState(() {
                     _isSelected = !_isSelected;
                   });
                 },
+                child: Tooltip(
+                message: 'testing',
                 child: Container(
                   decoration: BoxDecoration(
                     color: _isSelected ? Colors.white : Colors.deepPurpleAccent[100],
@@ -99,6 +115,7 @@ class _FloatingBubbleState extends State<FloatingBubble>
                     child: widget.icon,
                   ),
                 ),
+              ),
               ),
             ),
           ],

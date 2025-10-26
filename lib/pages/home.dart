@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/bubble.dart';
+import '../widgets/map.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -33,7 +34,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         toolbarHeight: 50,
       ),
-      body: Center(
+      body: Stack(
+        children: [
+          MapView(
+            onTap: (point){
+              debugPrint("map tapped: $point");
+            },
+          ),
+      Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -55,7 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
+      )
+        ],
       ),
+
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
