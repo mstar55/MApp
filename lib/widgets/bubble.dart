@@ -3,14 +3,16 @@ import 'dart:math';
 
 class FloatingBubble extends StatefulWidget {
   final Icon icon;
-  final bool shrink;
-  final bool onScreen;
+  final bool shrink; // icon + metadata form or more details form
+  final double zoom;
+  final String description; // more details
 
   const FloatingBubble({
     super.key,
     required this.icon,
     required this.shrink,
-    required this.onScreen,
+    required this.zoom,
+    required this.description,
   });
 
   @override
@@ -35,13 +37,13 @@ class _FloatingBubbleState extends State<FloatingBubble>
     )..repeat(reverse: true);
 
     _xAnimation = Tween<double>(
-      begin: -10 + _random.nextDouble() * 20,
-      end: -10 + _random.nextDouble() * 30,
+      begin: -10 + _random.nextDouble() * 10,
+      end: -10 + _random.nextDouble() * 10,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _yAnimation = Tween<double>(
-      begin: -10 + _random.nextDouble() * 20,
-      end: -10 + _random.nextDouble() * 25,
+      begin: -10 + _random.nextDouble() * 10,
+      end: -10 + _random.nextDouble() * 10,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -56,48 +58,40 @@ class _FloatingBubbleState extends State<FloatingBubble>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Stack(
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
-              top: 50 + _yAnimation.value,
-              left: 50 + _xAnimation.value,
-              width: _isSelected
-                  ? 160
-                  : widget.shrink
-                  ? 60
-                  : 80,
-              height: _isSelected
-                  ? 160
-                  : widget.shrink
-                  ? 60
-                  : 80,
-              child: GestureDetector(
-                onTap: () {
-                  if(!_isSelected && canShowTrackingTip)
-                    {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Hold the bubble to see path'),
-                            duration: Duration(seconds: 3)
-                        ),
-                      );
-                      canShowTrackingTip = false;
-                      Future.delayed(const Duration(seconds: 5), (){
-                        canShowTrackingTip = true;
-                      });
-                    }
-                  setState(() {
-                    _isSelected = !_isSelected;
-                  });
-                },
-                child: Tooltip(
-                message: 'testing',
-                child: Container(
+        return Center(
+          child: GestureDetector(
+            onTap: () {
+              if (!_isSelected && canShowTrackingTip) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Hold the bubble to trace path'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+                canShowTrackingTip = false;
+                Future.delayed(const Duration(seconds: 5), () {
+                  canShowTrackingTip = true;
+                });
+              }
+              setState(() {
+                _isSelected = !_isSelected;
+              });
+            },
+            child: Tooltip(
+              message: 'Tracing...',
+              child: Transform.translate(
+                offset: Offset(_xAnimation.value, _yAnimation.value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  width: _isSelected ? 200 : 50,
+                  height: _isSelected ? 200 : 50,
                   decoration: BoxDecoration(
-                    color: _isSelected ? Colors.white : Colors.deepPurpleAccent[100],
-                    borderRadius: BorderRadius.circular(_isSelected ? 20 : 80),
+                    color: _isSelected
+                        ? Colors.white
+                        : Colors.deepPurpleAccent[100],
+                    borderRadius:
+                    BorderRadius.circular(_isSelected ? 20 : 80),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black26,
@@ -106,19 +100,17 @@ class _FloatingBubbleState extends State<FloatingBubble>
                       ),
                     ],
                   ),
-                  alignment: Alignment.center,
                   child: IconTheme(
-                    data: IconThemeData(
+                    data: const IconThemeData(
                       color: Colors.black,
-                      size: _isSelected ? 28 : 20,
+                      size: 20,
                     ),
                     child: widget.icon,
                   ),
                 ),
               ),
-              ),
             ),
-          ],
+          ),
         );
       },
     );

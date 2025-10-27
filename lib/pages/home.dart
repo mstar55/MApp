@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/bubble.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import '../widgets/map.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -13,11 +15,38 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final mapController = MapController();
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  Future<void> _goToUser() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location services are disabled.')),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location permission permanently denied.')),
+      );
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    if (!mounted) return;
+    mapController.move(
+      LatLng(position.latitude, position.longitude),
+      18.0,
+    );
   }
 
   void _decrementCounter() {
@@ -33,37 +62,23 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.grey[850],
         title: Text(widget.title),
         toolbarHeight: 50,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
           MapView(
-            onTap: (point){
-              debugPrint("map tapped: $point");
-            },
+            controller: mapController,
           ),
-      Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text('You have pushed the button this many times:'),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ],
-            ),
-            // The floating bubble lives here
-            FloatingBubble(
-              icon: Icon(Icons.menu_book_sharp),
-              shrink: false,
-              onScreen: true,
-            ),
-          ],
-        ),
-      )
         ],
       ),
 
@@ -71,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
-            onPressed: _incrementCounter,
+            onPressed: _goToUser,
             tooltip: 'Increment',
             child: const Icon(Icons.add),
           ),
