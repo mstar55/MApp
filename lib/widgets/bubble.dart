@@ -3,15 +3,17 @@ import 'dart:math';
 
 class FloatingBubble extends StatefulWidget {
   final Icon icon;
-  final bool shrink; // icon + metadata form or more details form
   final double zoom;
+  final bool highlight;
+  final String meta;
   final String description; // more details
 
   const FloatingBubble({
     super.key,
     required this.icon,
-    required this.shrink,
     required this.zoom,
+    required this.highlight,
+    required this.meta,
     required this.description,
   });
 
@@ -64,7 +66,7 @@ class _FloatingBubbleState extends State<FloatingBubble>
               if (!_isSelected && canShowTrackingTip) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Hold the bubble to trace path'),
+                    content: Text('double tap the bubble to trace path'),
                     duration: Duration(seconds: 3),
                   ),
                 );
@@ -83,26 +85,33 @@ class _FloatingBubbleState extends State<FloatingBubble>
                 offset: Offset(_xAnimation.value, _yAnimation.value),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutCubic,
-                  width: _isSelected ? 200 : 50,
-                  height: _isSelected ? 200 : 50,
+                  curve: Curves.linearToEaseOut,
+                  width: _isSelected ? 200 : widget.highlight ? 65 : 50,
+                  height: _isSelected ? 200 : widget.highlight ? 65 : 50,
                   decoration: BoxDecoration(
                     color: _isSelected
                         ? Colors.white
-                        : Colors.deepPurpleAccent[100],
+                        : Colors.blue[100],
                     borderRadius:
                     BorderRadius.circular(_isSelected ? 20 : 80),
-                    boxShadow: const [
+                    boxShadow: widget.highlight ? [
+                      BoxShadow(
+                        color: Colors.amberAccent.shade100,
+                        blurRadius: 3,
+                        spreadRadius: 10,
+                      ),
+                    ]
+                    : [
                       BoxShadow(
                         color: Colors.black26,
-                        blurRadius: 10,
+                        blurRadius: 6,
                         spreadRadius: 2,
                       ),
                     ],
                   ),
                   child: IconTheme(
                     data: const IconThemeData(
-                      color: Colors.black,
+                      color: Colors.black87,
                       size: 20,
                     ),
                     child: widget.icon,

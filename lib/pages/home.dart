@@ -87,8 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           FloatingActionButton(
             onPressed: _goToUser,
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
+            tooltip: 'track location',
+            child: const Icon(Icons.my_location),
           ),
           const SizedBox(height: 10),
           FloatingActionButton(
@@ -110,12 +110,8 @@ class _MyHomePageState extends State<MyHomePage> {
               label: 'HomeMap',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'add',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble),
-            label: 'chat',
+            label: 'chat (WIP)',
           ),
         ],
       ),
